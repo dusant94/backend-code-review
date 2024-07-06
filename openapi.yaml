@@ -1,0 +1,62 @@
+openapi: 3.0.0
+info:
+  title: Messages API
+  version: 1.0.0
+paths:
+  /messages:
+    get:
+      summary: Get Messages
+      description: Retrieves a list of messages.
+      parameters:
+        - name: status
+          in: query
+          description: Filter messages by status
+          required: false
+          schema:
+            type: "string"
+            enum:
+              - "sent"
+              - "read"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  messages:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        uuid: 
+                          type: "string"
+                        text:
+                          type: "string"
+                        status:
+                          type: "string"
+                          enum:
+                            - "sent"
+                            - "read"
+              example:
+                messages:
+                  - text: "Hello, World!"
+                    status: "read"
+                  - text: "How are you today?"
+                    status: "sent"
+                  - text: "Thanks, I'm fine. How about you?"
+                    status: "sent"
+  /messages/send:
+    get:
+      summary: Send a Message
+      parameters:
+        - name: text
+          in: query
+          description: The text you want to send
+          required: true
+          schema:
+            type: "string"
+      responses:
+        '204':
+          description: Successfully sent
