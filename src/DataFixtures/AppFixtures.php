@@ -17,7 +17,7 @@ class AppFixtures extends Fixture
         
         foreach (range(1, 10) as $i) {
             $message = new Message();
-            $message->setUuid(Uuid::v6()->toRfc4122());
+            $message->setUuid(Uuid::v6());
             $message->setText($faker->sentence);
             $message->setStatus(random(['sent', 'read']));
             $message->setCreatedAt(new \DateTime());

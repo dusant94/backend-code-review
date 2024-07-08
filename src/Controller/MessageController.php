@@ -24,21 +24,27 @@ class MessageController extends AbstractController
      * TODO: cover this method with tests, and refactor the code (including other files that need to be refactored)
      */
     #[Route('/messages')]
-    public function list(Request $request, MessageRepository $messages): Response
+    public function list(Request $request, MessageRepository $messageRepository): Response
     {
-        $messages = $messages->by($request);
-  
-        foreach ($messages as $key=>$message) {
-            $messages[$key] = [
+        try {
+            $status = $request->query->get('status');
+
+            if(!empty($status) && is_string($status)){
+                $messages = $messageRepository->findbyStatus($status);
+            } else {
+                $messages = $messageRepository->findAllMessages();
+            }
+    
+            $responseData = array_map(fn($message) => [
                 'uuid' => $message->getUuid(),
                 'text' => $message->getText(),
                 'status' => $message->getStatus(),
-            ];
+            ], $messages);
+
+            return $this->json(['messages' => $responseData], 200, [], ['json_encode_options' => JSON_THROW_ON_ERROR]);
+        } catch (\Exception $e) {
+            return $this->json(['error' => $e->getMessage()], 500, [], ['json_encode_options' => JSON_THROW_ON_ERROR]);
         }
-        
-        return new Response(json_encode([
-            'messages' => $messages,
-        ], JSON_THROW_ON_ERROR), headers: ['Content-Type' => 'application/json']);
     }
 
     #[Route('/messages/send', methods: ['GET'])]
@@ -46,8 +52,8 @@ class MessageController extends AbstractController
     {
         $text = $request->query->get('text');
         
-        if (!$text) {
-            return new Response('Text is required', 400);
+        if (empty($text) || !is_string($text)) {
+            return $this->json(['error' => 'Text is required and must be a string'], 400);
         }
 
         $bus->dispatch(new SendMessage($text));

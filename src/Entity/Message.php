@@ -6,6 +6,7 @@ use App\Repository\MessageRepository;
 use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: MessageRepository::class)]
 /**
@@ -35,14 +36,14 @@ class Message
         return $this->id;
     }
 
-    public function getUuid(): ?string
+    public function getUuid(): ?Uuid
     {
-        return $this->uuid;
+        return $this->uuid ? Uuid::fromString($this->uuid) : null;
     }
 
-    public function setUuid(string $uuid): static
+    public function setUuid(Uuid $uuid): static
     {
-        $this->uuid = $uuid;
+        $this->uuid = $uuid->toRfc4122();
 
         return $this;
     }
